@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration</title>
+  </head>
+  <body>
+    <h1>REGISTER YOUR ACCOUNT</h1>
+    <form id="registerForm">
+      <input type="text" id="regUsername" placeholder="username" required />
+      <input type="password" id="regPassword" placeholder="password" required />
+      <button type="submit">Register</button>
+    </form>
+
+    <p id="errorMessage"></p>
+
+    <p>Already have an account? <a href="/login">click to login!</a></p>
+    <script src="{{url_for('static',filename='main.js')}}"></script>
+  </body>
+</html>

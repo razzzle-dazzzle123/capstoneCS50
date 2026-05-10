@@ -1,0 +1,151 @@
+document.addEventListener("DOMContentLoaded", function () {
+  document.getElementById("taskForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    let task = document.getElementById("taskID");
+    let taskValue = task.value;
+
+    if (taskValue.trim() === "") return;
+
+    fetch("/add", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ task: taskValue }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.status === "success") {
+          let li = document.createElement("li");
+
+          let span = document.createElement("span");
+          span.className = "task-text";
+          span.textContent = data.task;
+
+          let editBtn = document.createElement("button");
+          editBtn.className = "edit-btn";
+          editBtn.setAttribute("data-id", data.id);
+          editBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+              <g fill="none">
+                <path fill="#ffbc44" d="m2.848 16.615l-1.39 5.927l5.927-1.39l.232-.232l-4.536-4.536z"/>
+                <path fill="#ffdda1" d="M5.349 18.651L3.08 16.383l-.233.232l-1.39 5.927z"/>
+                <path stroke="#191919" stroke-linecap="round" stroke-linejoin="round" d="m2.848 16.615l-1.39 5.927l5.927-1.39l.232-.232l-4.536-4.536z"/>
+                <path fill="#ffef5e" d="m3.081 16.384l4.536 4.536L20.049 8.49l-4.53-4.547z"/>
+                <path fill="#fff9bf" d="M15.53 3.955L3.071 16.371l2.264 2.272L17.793 6.227z"/>
+                <path stroke="#191919" stroke-linecap="round" stroke-linejoin="round" d="m3.081 16.384l4.536 4.536L20.049 8.49l-4.53-4.547z"/>
+                <path fill="#e4f1f5" stroke="#191919" stroke-linecap="round" stroke-linejoin="round" d="m16.82 2.643l-1.301 1.3l4.53 4.546l1.31-1.31z"/>
+                <path fill="#ff808c" d="M22.005 6.533a1.834 1.834 0 0 0 0-2.593l-1.946-1.944a1.83 1.83 0 0 0-2.593 0l-.646.647l4.538 4.536z"/>
+                <path fill="#ffbfc5" d="m21.032 2.967l-.973-.972a1.83 1.83 0 0 0-2.593 0l-.646.648l2.269 2.268z"/>
+                <path stroke="#191919" stroke-linecap="round" stroke-linejoin="round" d="M22.005 6.533a1.834 1.834 0 0 0 0-2.593l-1.946-1.944a1.83 1.83 0 0 0-2.593 0l-.646.647l4.538 4.536z"/>
+              </g>
+            </svg>
+          `;
+
+          let deleteBtn = document.createElement("button");
+          deleteBtn.className = "delete-btn";
+          deleteBtn.setAttribute("data-id", data.id);
+          deleteBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24">
+              <g fill="none">
+                <path fill="#ff808c" d="m7.45 12l-6.363 6.363a1.01 1.01 0 0 0 0 1.43l3.12 3.12a1.01 1.01 0 0 0 1.43 0L12 16.55l6.363 6.363a1.01 1.01 0 0 0 1.43 0l3.12-3.12a1.01 1.01 0 0 0 0-1.43L16.55 12l6.363-6.363a1.01 1.01 0 0 0 0-1.43l-3.12-3.12a1.01 1.01 0 0 0-1.43 0L12 7.45L5.637 1.088a1.01 1.01 0 0 0-1.43 0l-3.12 3.12a1.01 1.01 0 0 0 0 1.43z"/>
+                <path fill="#ffbfc5" d="m1.088 19.792l1.56 1.56L21.352 2.648l-1.56-1.56a1.01 1.01 0 0 0-1.43 0L12 7.45L5.637 1.087a1.01 1.01 0 0 0-1.43 0l-3.12 3.12a1.01 1.01 0 0 0 0 1.43L7.45 12l-6.362 6.363a1.01 1.01 0 0 0 0 1.43"/>
+                <path stroke="#191919" stroke-linecap="round" stroke-linejoin="round" d="m7.45 12l-6.363 6.363a1.01 1.01 0 0 0 0 1.43l3.12 3.12a1.01 1.01 0 0 0 1.43 0L12 16.55l6.363 6.363a1.01 1.01 0 0 0 1.43 0l3.12-3.12a1.01 1.01 0 0 0 0-1.43L16.55 12l6.363-6.363a1.01 1.01 0 0 0 0-1.43l-3.12-3.12a1.01 1.01 0 0 0-1.43 0L12 7.45L5.637 1.088a1.01 1.01 0 0 0-1.43 0l-3.12 3.12a1.01 1.01 0 0 0 0 1.43z"/>
+              </g>
+            </svg>
+          `;
+
+          li.appendChild(span);
+          li.appendChild(editBtn);
+          li.appendChild(deleteBtn);
+          document.getElementById("taskList").appendChild(li);
+
+          task.value = "";
+        }
+      });
+  });
+
+  document.getElementById("taskList").addEventListener("click", function (e) {
+    // --- DELETE LOGIC ---
+    let deleteBtn = e.target.closest(".delete-btn");
+    if (deleteBtn) {
+      let taskId = deleteBtn.getAttribute("data-id");
+      let listItem = deleteBtn.closest("li");
+
+      fetch("/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: taskId }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            listItem.remove();
+          }
+        });
+    }
+
+    let editBtn = e.target.closest(".edit-btn");
+    if (editBtn) {
+      let listItem = editBtn.closest("li");
+      let span = listItem.querySelector(".task-text");
+      let taskId = editBtn.getAttribute("data-id");
+
+      if (listItem.classList.contains("editing")) {
+        let editInput = listItem.querySelector(".edit-input");
+        let newValue = editInput.value;
+
+        if (newValue.trim() === "") return;
+
+        fetch("/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: taskId, task: newValue }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.status === "success") {
+              span.textContent = newValue;
+              span.style.display = "inline";
+              editInput.remove();
+              listItem.classList.remove("editing");
+            }
+          });
+      } else {
+        listItem.classList.add("editing");
+        span.style.display = "none";
+
+        let input = document.createElement("input");
+        input.type = "text";
+        input.className = "edit-input";
+        input.value = span.textContent.trim();
+
+        listItem.insertBefore(input, editBtn);
+        input.focus();
+      }
+    }
+  });
+  let registerForm = document.getElementById("registerForm");
+  if (registerForm) {
+    registerForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      let username = document.getElementById("regUsername").value;
+      let password = document.getElementById("regPassword").value;
+
+      fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username, password: password }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.status === "success") {
+            window.location.href = "/login";
+          } else {
+            document.getElementById("errorMessage").textContent = data.message;
+          }
+        });
+    });
+  }
+});
